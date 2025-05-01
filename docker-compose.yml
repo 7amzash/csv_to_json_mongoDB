@@ -1,0 +1,35 @@
+services:
+  # ------------------------------------------------------------
+  # Main Application Service: CSV to JSON + MongoDB Import Tool
+  # ------------------------------------------------------------
+  app:
+    build:
+      context: .        # Tells Docker to build the image from the current directory (Dockerfile must be here)
+    volumes:
+      - /:/host         # Mounts the ENTIRE root directory (/) of the host into the container at /host
+                        # This allows the user inside the container to browse, read, or operate on real host files
+                        # ⚠️ Caution: Full host access is powerful; consider security implications!
+    depends_on:
+      - mongodb         # Ensures MongoDB starts before the app (waits for container readiness, not DB availability)
+    stdin_open: true    # Keeps STDIN open, required for interactive prompts (like prompt_toolkit)
+    tty: true           # Allocates a pseudo-TTY (terminal), enabling colored text, interactivity, etc.
+    environment:
+      - MOUNT_PATH=/host
+      - MONGODB_HOST=mongodb
+      - MONGODB_PORT=27017
+
+  # ---------------------
+  # MongoDB Service Setup
+  # ---------------------
+  mongodb:
+    image: mongo:4.4    # Using a stable MongoDB version (4.4) that works on systems without AVX
+    ports:
+      - "27017:27017"   # Maps MongoDB port so it’s accessible from host at localhost:27017
+    volumes:
+      - mongo_data:/data/db  # Persist MongoDB data across container restarts in a named volume
+
+# -------------------------
+# Docker Named Volumes Block
+# -------------------------
+volumes:
+  mongo_data:       

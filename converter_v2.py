@@ -30,28 +30,32 @@ class CommandOrPathCompleter(Completer):
         self.path_completer = path_completer  # Handles filesystem path autocompletion.
 
     def get_completions(self, document, complete_event):
-        text = document.text_before_cursor  # Get the text the user has typed so far before the cursor.
-        parts = text.strip().split()  # Split input into words (command and its arguments).
+        text = document.text_before_cursor.strip()
+        parts = text.split()
 
         if not parts:
             # If nothing is typed, show available commands.
             yield from self.command_completer.get_completions(document, complete_event)
             return
 
-        command = parts[0]  # First word is assumed to be the command (e.g., 'cd').
+        command = parts[0]
 
+        # If command is a known command that expects a path
         if command in ['cd', 'ls', 'delete']:
             if text.endswith(" ") or len(parts) >= 2:
-                # If a space was typed or an argument is being entered, switch to path completion.
-                arg_text = text[len(command) + 1:]  # Extract only the argument part.
+                arg_text = text[len(command) + 1:]
                 from prompt_toolkit.document import Document
                 new_document = Document(text=arg_text, cursor_position=len(arg_text))
                 yield from self.path_completer.get_completions(new_document, complete_event)
                 return
 
-        # If only a command is being typed, suggest matching command completions.
-        if len(parts) == 1:
+        # If only a known command is being typed
+        if len(parts) == 1 and command in ['cd', 'ls', 'delete', 'pwd', 'exit']:
             yield from self.command_completer.get_completions(document, complete_event)
+            return
+
+        # 🧠 Fallback: Treat as a file path and offer autocompletion
+        yield from self.path_completer.get_completions(document, complete_event)
 
 
 # ==== MAIN FUNCTION ====

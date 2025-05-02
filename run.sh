@@ -41,7 +41,7 @@ esac
 # Default behavior if no option or unknown one
 # ─────────────────────────────────────────────
 echo "🚀 Launching app interactively (MongoDB will start in background if needed)..."
-docker compose run --rm -e MOUNT_PATH -e MONGODB_HOST -e MONGODB_PORT app
+docker compose run --rm -it -e MOUNT_PATH -e MONGODB_HOST -e MONGODB_PORT app
 # Runs the "app" service in interactive mode (supports prompt_toolkit input, TTY, etc.)
 # --rm ensures the container is deleted after it stops (no leftover containers)
 # MongoDB will start automatically in background if not running due to "depends_on"
